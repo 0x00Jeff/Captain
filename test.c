@@ -45,8 +45,10 @@ int main(){
 
 	// changing the code responsible for editting the health
 	
-	// health
+	//// health
 	WriteCode(h, (void *)(base + health_code_start), health_opcodes, health_opcodes_size);
+
+
 
 	//// pistol ammo
 	// standing up
@@ -56,6 +58,11 @@ int main(){
 	WriteCode(h, (void *)(base + croushing_ammo_code_start), ammo_opcodes, ammo_opcodes_size);
 
 
+	//// magic claw
+	// standing up
+	WriteCode(h, (void *)(base + standing_magic_claw_start), ammo_opcodes, ammo_opcodes_size);
+	// croushing
+	WriteCode(h, (void *)(base + croushing_magic_claw_start), ammo_opcodes, ammo_opcodes_size);
 
 	puts("check now!");
 }

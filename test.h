@@ -34,13 +34,15 @@
 	unsigned char health_opcodes[] = {0x01, 0xf9}; 
 	size_t health_opcodes_size = sizeof(health_opcodes) / sizeof(health_opcodes[0]);
 
-	// ammo
+	// pistol ammo
 	unsigned int standing_ammo_code_start = 0x1DAF6;
 	unsigned int croushing_ammo_code_start = 0x1DE38;
 	unsigned char ammo_opcodes[] = {0x90, 0x90, 0x90, 0x90, 0x41};
 	size_t ammo_opcodes_size = sizeof(ammo_opcodes) / sizeof(ammo_opcodes[0]);
 
-
-	
+	// magic claw
+	unsigned int standing_magic_claw_start = 0x1DB6F;
+	unsigned int croushing_magic_claw_start = 0x1DEC5;
+	// same as ammo_opcodes
 
 #endif
