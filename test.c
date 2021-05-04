@@ -45,25 +45,52 @@ int main(){
 
 	// changing the code responsible for editting the health
 	
-	DWORD new_perms = PAGE_READWRITE;
-	DWORD old_perms;
-	WORD new_opcodes = 0xf901;
-	if(!VirtualProtectEx(h, (void *)(base + health_code_start), 2, new_perms, &old_perms)){
-		CloseHandle(h);
-		perrno("VirtualProtectEx");
-		return -1;
-	}
+	// health
+	WriteCode(h, (void *)(base + health_code_start), health_opcodes, health_opcodes_size);
+
+	// pistol ammo
+	printf("ammo code is @ CLAW.EXE + %p\n", ammo_code_start);
+	WriteCode(h, (void *)(base + ammo_code_start), ammo_opcodes, ammo_opcodes_size);
 
 
-	WriteProcessMemory(h, (void *)(base + health_code_start), &new_opcodes, sizeof(new_opcodes), NULL); // handle errors!
-
-	if(!VirtualProtectEx(h, (void *)(base + health_code_start), 2, old_perms, NULL)){
-		CloseHandle(h);
-		perrno("VirtualProtectEx");
-		return -1;
-	}
 
 	puts("check now!");
+}
+
+void WriteCode(HANDLE h, void *ptr, char *opcodes, size_t size){
+
+	DWORD new_perms = PAGE_READWRITE;
+	DWORD old_perms;
+
+/*/	puts("calling the first VirtualProtectEx");
+	if(!VirtualProtectEx(h, ptr, size, new_perms, &old_perms)){
+		fprintf(stderr, "VirtualProtectEx failed with %ld\n", GetLastError());
+		perrno("VirtualProtectEx");
+		CloseHandle(h);
+		//return -1; // TODO : use this for error check later!
+		return;
+	}
+*/
+
+	printf("writing to address %p\n", ptr);
+	puts("calling the second  VirtualProtectEx");
+
+	if(!WriteProcessMemory(h, ptr, (void *)opcodes, size, NULL)){
+		fprintf(stderr, "WriteProcessMemory failed with %ld\n", GetLastError());
+		perrno("WriteProcessMemory");
+		return;
+
+	}
+
+/*
+	if(!VirtualProtectEx(h, ptr, size, old_perms, NULL)){
+		fprintf(stderr, "VirtualProtectEx failed with %ld\n", GetLastError());
+		perrno("VirtualProtectEx");
+		CloseHandle(h);
+		//return -1; // TODO : use this for error check later!
+		return;
+	}
+*/
 }
 
 void ReadWriteMemory(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size, LPCVOID new_value, size_t value_size){

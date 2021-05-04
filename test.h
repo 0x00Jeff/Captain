@@ -6,6 +6,7 @@
 	uintptr_t GetModuleBaseAddress(DWORD pid, char *module_name);
 	uintptr_t resolve_dynamic_address(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size);
 	void ReadWriteMemory(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size, LPCVOID new_value, size_t value_size);
+	void WriteCode(HANDLE h, void *ptr, char *opcodes, size_t size);
 	void perrno(char *msg);
 
 	///////////////////////////////// memory editting stuff ///////////////////////////
@@ -30,9 +31,13 @@
 	
 	// health
 	unsigned int health_code_start = 0x1E849;
+	unsigned char health_opcodes[] = {0x01, 0xf9}; 
+	size_t health_opcodes_size = sizeof(health_opcodes) / sizeof(health_opcodes[0]);
 
 	// ammo
-	unsigned int ammo_code_start = 0x1DAFA;
+	unsigned int ammo_code_start = 0x1DAF6;
+	unsigned char ammo_opcodes[] = {0x90, 0x90, 0x90, 0x90, 0x41};
+	size_t ammo_opcodes_size = sizeof(ammo_opcodes) / sizeof(ammo_opcodes[0]);
 
 
 	
