@@ -48,9 +48,12 @@ int main(){
 	// health
 	WriteCode(h, (void *)(base + health_code_start), health_opcodes, health_opcodes_size);
 
-	// pistol ammo
-	printf("ammo code is @ CLAW.EXE + %p\n", ammo_code_start);
-	WriteCode(h, (void *)(base + ammo_code_start), ammo_opcodes, ammo_opcodes_size);
+	//// pistol ammo
+	// standing up
+	WriteCode(h, (void *)(base + standing_ammo_code_start), ammo_opcodes, ammo_opcodes_size);
+
+	// croushing
+	WriteCode(h, (void *)(base + croushing_ammo_code_start), ammo_opcodes, ammo_opcodes_size);
 
 
 
