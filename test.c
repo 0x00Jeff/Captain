@@ -64,6 +64,16 @@ int main(){
 	// croushing
 	WriteCode(h, (void *)(base + croushing_magic_claw_start), ammo_opcodes, ammo_opcodes_size);
 
+
+
+	//// dynamite ammo
+	// standing
+	WriteCode(h, (void *)(base + standing_dynamite_code_start), dec_to_inc, dec_to_inc_size);
+
+	// croushing
+	WriteCode(h, (void *)(base + croushing_dynamite_code_start), dec_to_inc, dec_to_inc_size);
+
+
 	puts("check now!");
 }
 
@@ -71,16 +81,6 @@ void WriteCode(HANDLE h, void *ptr, char *opcodes, size_t size){
 
 	DWORD new_perms = PAGE_READWRITE;
 	DWORD old_perms;
-
-/*/	puts("calling the first VirtualProtectEx");
-	if(!VirtualProtectEx(h, ptr, size, new_perms, &old_perms)){
-		fprintf(stderr, "VirtualProtectEx failed with %ld\n", GetLastError());
-		perrno("VirtualProtectEx");
-		CloseHandle(h);
-		//return -1; // TODO : use this for error check later!
-		return;
-	}
-*/
 
 	printf("writing to address %p\n", ptr);
 	puts("calling the second  VirtualProtectEx");
@@ -91,16 +91,6 @@ void WriteCode(HANDLE h, void *ptr, char *opcodes, size_t size){
 		return;
 
 	}
-
-/*
-	if(!VirtualProtectEx(h, ptr, size, old_perms, NULL)){
-		fprintf(stderr, "VirtualProtectEx failed with %ld\n", GetLastError());
-		perrno("VirtualProtectEx");
-		CloseHandle(h);
-		//return -1; // TODO : use this for error check later!
-		return;
-	}
-*/
 }
 
 void ReadWriteMemory(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size, LPCVOID new_value, size_t value_size){
@@ -108,8 +98,6 @@ void ReadWriteMemory(HANDLE h, uintptr_t base, unsigned int *offsets, size_t siz
 	uintptr_t target_addr = resolve_dynamic_address(h, base, offsets, size);
 
 	DWORD value;
-
-//	ReadProcessMemory(h, (void *)target_addr, &value, sizeof(value), NULL); // handle errors!
 
 	WriteProcessMemory(h, (void *)target_addr, new_value, value_size, NULL); // handle errors!
 }

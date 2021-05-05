@@ -45,4 +45,11 @@
 	unsigned int croushing_magic_claw_start = 0x1DEC5;
 	// same as ammo_opcodes
 
+	// dynamites
+	unsigned int standing_dynamite_code_start = 0x1DC86;
+	unsigned int croushing_dynamite_code_start = 0x1DFEC;
+	unsigned char dec_to_inc[] = {0x41};
+	size_t dec_to_inc_size = sizeof(dec_to_inc) / sizeof(dec_to_inc[0]);
+	
+
 #endif
