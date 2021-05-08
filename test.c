@@ -80,6 +80,13 @@ int main(){
 	// health part2
 	WriteCode(h, (void *)(base + health_limit_start2), health_limit_opcodes2, health_limit_opcodes_size2);
 
+	// pistol ammo
+	WriteCode(h, (void *)(base + ammo_limit_start), ammo_limit_opcodes, ammo_limit_size);
+
+	// magic claw
+	WriteCode(h, (void *)(base + magic_limit_start), magic_limit_opcodes, magic_limit_size);
+	
+
 
 	puts("check now!");
 }
