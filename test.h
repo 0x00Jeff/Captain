@@ -51,5 +51,15 @@
 	unsigned char dec_to_inc[] = {0x41};
 	size_t dec_to_inc_size = sizeof(dec_to_inc) / sizeof(dec_to_inc[0]);
 	
+	//// extending the limits
+	// health
+	// the following address has some code which resets the health to 100 if it exceeds that value and we want to get ride of that functionality
+	unsigned int health_limit_start1 = 0x1E454;
+	unsigned char health_limit_opcodes1[] = {0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
+	size_t health_limit_opcodes_size1 = sizeof(health_limit_opcodes1) / sizeof(health_limit_opcodes1[0]);
+
+	unsigned int health_limit_start2 = 0x1E511;
+	unsigned char health_limit_opcodes2[] = {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
+	size_t health_limit_opcodes_size2 = sizeof(health_limit_opcodes2) / sizeof(health_limit_opcodes2[0]);
 
 #endif
