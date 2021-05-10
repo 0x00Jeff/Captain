@@ -1,9 +1,12 @@
 # Captain
 
-Captain is cheat for the the game known as Captain claw, for now it only has the following festures:
+Captain is cheat for the the game known as Captain claw, it has 2 cheating modes and each has its features : 
 
-- starting the game with a good amount of health, and ammo of each of the three weapons that the game has (pistol, magic claw, dynamites)
-- editting the game code such as :
-	- the health increases every time the player gets hit (for god mod)
-	- the pistol ammo, the magic claw and the dynamite increase every time the player uses them (for god mod)
-	- there is no limit to any of the health, postol ammo and the magic claw (for palyable mode)
+## god mod
+	- the player doesn't get any damage when hit
+	- the player has infinite ammo of the 3 weapon in the game (pistol, magic claw and dynamite)
+	- once you pickup a jumper, you don't loose it till the end of the current level unless you die 
+
+## playable mode
+	- the game starts with all weapons having 30 ammo
+	- there is no limit to any of the health, postol ammo and the magic claws so you can pick up health/ammo bottles beyond the limit of what you can carry

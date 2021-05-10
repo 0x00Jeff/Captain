@@ -2,7 +2,13 @@
 	#define _CHEAT_H
 	#define TARGET "CLAW.EXE"
 
+	// modes
+	#define GOD_MODE 1
+	#define PLAYABLE 2
+
+	// functions
 	DWORD get_proc_id(char *name);
+	BOOL IsLevelStarted(HANDLE h, uintptr_t base, unsigned int *offsets,size_t size);
 	uintptr_t GetModuleBaseAddress(DWORD pid, char *module_name);
 	uintptr_t resolve_dynamic_address(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size);
 	void ReadWriteMemory(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size, LPCVOID new_value, size_t value_size);
@@ -30,30 +36,32 @@
 	///////////////////////////////// code editting stuff /////////////////////////////
 	
 	// health
-	unsigned int health_code_start = 0x1E849;
-	unsigned char health_opcodes[] = {0x01, 0xf9}; 
+	unsigned int health_offset = 0x1E849;
+	unsigned char health_opcodes[] = {0x90, 0x90}; 
 	size_t health_opcodes_size = sizeof(health_opcodes) / sizeof(health_opcodes[0]);
 
 	// pistol ammo
-	unsigned int standing_ammo_code_start = 0x1DAF6;
-	unsigned int croushing_ammo_code_start = 0x1DE38;
-	unsigned char ammo_opcodes[] = {0x90, 0x90, 0x90, 0x90, 0x41};
+	unsigned int standing_ammo_offset = 0x1DAF6 + 4;
+	unsigned int croushing_ammo_offset = 0x1DE38 + 4;
+	unsigned char ammo_opcodes[] = {0x90};
 	size_t ammo_opcodes_size = sizeof(ammo_opcodes) / sizeof(ammo_opcodes[0]);
 
 	// magic claw
-	unsigned int standing_magic_claw_start = 0x1DB6F;
-	unsigned int croushing_magic_claw_start = 0x1DEC5;
-	// same as ammo_opcodes
-
+	unsigned int standing_magic_offset = 0x1DB6F + 4;
+	unsigned int croushing_magic_offset = 0x1DEC5 + 4;
+	unsigned char dec_to_nop[] = {0x90};
+	size_t dec_to_nop_size = 1;
+	
 	// dynamites
-	unsigned int standing_dynamite_code_start = 0x1DC86;
-	unsigned int croushing_dynamite_code_start = 0x1DFEC;
-	unsigned char dec_to_inc[] = {0x41};
-	size_t dec_to_inc_size = sizeof(dec_to_inc) / sizeof(dec_to_inc[0]);
+	unsigned int standing_dynamite_offset = 0x1DC86;
+	unsigned int croushing_dynamite_offset = 0x1DFEC;
+	// uses dec_to_nop
 	
 	//// extending the limits
 	// health
-	// the following address has some code which resets the health to 100 if it exceeds that value and we want to get ride of that functionality
+	//
+	// the following 2 addresses does 2 things, first it doesn't let the player to pickup a bottle of water of the health was full, the second is resetting the health to 100 if it exceeds that value e.i if the health was 95 and the player pick up a bottle which gives more than 5 hp
+	// of course, we need to get rid of both those functionalitles
 	unsigned int health_limit_start1 = 0x1E454;
 	unsigned char health_limit_opcodes1[] = {0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
 	size_t health_limit_opcodes_size1 = sizeof(health_limit_opcodes1) / sizeof(health_limit_opcodes1[0]);
@@ -63,13 +71,18 @@
 	size_t health_limit_opcodes_size2 = sizeof(health_limit_opcodes2) / sizeof(health_limit_opcodes2[0]);
 
 	// ammo
-	unsigned int ammo_limit_start = 0x1E58E;
+	unsigned int ammo_limit_start = 0x1E58E; // resets the ammo to 99 if it exceeds it
 	unsigned char ammo_limit_opcodes[] = {0x90, 0x90,0x90, 0x90, 0x90, 0x90, 0x90};
 	size_t ammo_limit_size = sizeof(ammo_limit_opcodes) / sizeof(ammo_limit_opcodes[0]);
 
 	// magic claw
-	unsigned int magic_limit_start = 0x1E551;
+	unsigned int magic_limit_start = 0x1E551; // resets the magic to 99 if it exceeds it
 	unsigned char magic_limit_opcodes[] = {0x90, 0x90,0x90, 0x90, 0x90, 0x90, 0x90};
 	size_t magic_limit_size = sizeof(magic_limit_opcodes) / sizeof(magic_limit_opcodes[0]);
+
+	// jumper
+	unsigned int jumper_limit_offset = 0x20F34; // decreases the jumper time
+	unsigned char jumper_limit_opcodes[] = {0x90, 0x90};
+	size_t jumper_limit_size = sizeof(jumper_limit_opcodes) / sizeof(jumper_limit_opcodes[0]);
 
 #endif
