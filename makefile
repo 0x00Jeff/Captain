@@ -5,4 +5,3 @@ Captain.exe: Captain.o
 	rm -- Captain.o 
 
 Captain.o: Captain.c Captain.h
-	$(CC) -c Captain.c

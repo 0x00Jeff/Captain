@@ -71,12 +71,12 @@
 	size_t health_limit_opcodes_size2 = sizeof(health_limit_opcodes2) / sizeof(health_limit_opcodes2[0]);
 
 	// ammo
-	unsigned int ammo_limit_start = 0x1E58E; // resets the ammo to 99 if it exceeds it
+	unsigned int ammo_limit_offset = 0x1E58E; // resets the ammo to 99 if it exceeds it
 	unsigned char ammo_limit_opcodes[] = {0x90, 0x90,0x90, 0x90, 0x90, 0x90, 0x90};
 	size_t ammo_limit_size = sizeof(ammo_limit_opcodes) / sizeof(ammo_limit_opcodes[0]);
 
 	// magic claw
-	unsigned int magic_limit_start = 0x1E551; // resets the magic to 99 if it exceeds it
+	unsigned int magic_limit_offset = 0x1E551; // resets the magic to 99 if it exceeds it
 	unsigned char magic_limit_opcodes[] = {0x90, 0x90,0x90, 0x90, 0x90, 0x90, 0x90};
 	size_t magic_limit_size = sizeof(magic_limit_opcodes) / sizeof(magic_limit_opcodes[0]);
 

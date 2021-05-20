@@ -34,6 +34,7 @@ int main(){
 	uintptr_t base = GetModuleBaseAddress(pid, TARGET);
 	if(!base){
 		fprintf(stderr, "coudln't find %s module base :(", TARGET);
+		CloseHandle(h);
 		return -1;
 	}
 
@@ -95,15 +96,18 @@ int main(){
         	WriteCode(h, (void *)(base + health_limit_start2), health_limit_opcodes2, health_limit_opcodes_size2);
         
         	// pistol ammo
-        	WriteCode(h, (void *)(base + ammo_limit_start), ammo_limit_opcodes, ammo_limit_size);
+        	WriteCode(h, (void *)(base + ammo_limit_offset), ammo_limit_opcodes, ammo_limit_size);
         
         	// magic claw
-        	WriteCode(h, (void *)(base + magic_limit_start), magic_limit_opcodes, magic_limit_size);
+        	WriteCode(h, (void *)(base + magic_limit_offset), magic_limit_opcodes, magic_limit_size);
 
 	
 	}
 
+	CloseHandle(h);
 	puts("done");
+
+	return 0;
 }
 
 void WriteCode(HANDLE h, void *ptr, char *opcodes, size_t size){
@@ -111,14 +115,16 @@ void WriteCode(HANDLE h, void *ptr, char *opcodes, size_t size){
 	if(!WriteProcessMemory(h, ptr, (void *)opcodes, size, NULL)){
 		fprintf(stderr, "WriteProcessMemory failed with %ld\n", GetLastError());
 		perrno("WriteProcessMemory");
-		return;
 	}
 }
 
 void ReadWriteMemory(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size, LPCVOID new_value, size_t value_size){
 
 	uintptr_t target_addr = resolve_dynamic_address(h, base, offsets, size);
-	WriteProcessMemory(h, (void *)target_addr, new_value, value_size, NULL); // handle errors!
+	if(!WriteProcessMemory(h, (void *)target_addr, new_value, value_size, NULL)){ // handle errors!
+		fprintf(stderr, "WriteProcessMemory failed with %ld\n", GetLastError());
+		perrno("WriteProcessMemory");
+	}
 }
 
 uintptr_t resolve_dynamic_address(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size){
@@ -137,7 +143,8 @@ uintptr_t GetModuleBaseAddress(DWORD pid, char *module_name){
 
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE32 | TH32CS_SNAPMODULE, pid);
 	if(snapshot == INVALID_HANDLE_VALUE){
-		fprintf(stderr, "CreateToolhelp32Snapshot failed with %lld\n", GetLastError());
+		//fprintf(stderr, "CreateToolhelp32Snapshot failed with %lld\n", GetLastError());
+		perrno("CreatetoolHelp32Snapshot");
 		return module_base;
 	}
 
