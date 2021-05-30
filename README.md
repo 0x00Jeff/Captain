@@ -12,3 +12,18 @@ Captain is cheat for the the game known as Captain claw, it has 2 cheating modes
 ## playable mode
 - the game starts with all weapons having 30 ammo
 - there is no limit to any of the health, postol ammo and the magic claws. so the player can pick up health/ammo bottles beyond what they can normally carry
+
+# building process
+this code was written and built under GNU/Linux, if you're are using it as well, you should install `mingw-w64` package using one of the following commands depending on your distro, if you're building on it windows, figure it out.
+### ubuntu / linux mint
+        - sudo apt update && sudo apt install -y mingw-w64
+## Arch linux
+        - sudo pacman -S mingw-64
+        
+then run 
+```bash
+git clone https://github.com/0x00Jeff/Captain.git
+cd Captain
+make
+```
+and you're good to go
