@@ -1,6 +1,6 @@
 # Captain
 
-![claw.jpg](https://github.com/0x00Jeff/Captain/blob/main/Assets/claw.jpg)
+![claw.jpg](https://github.com/0x00Jeff/Captain/blob/main/Assets/claw.png)
 
 Captain is cheat for the the game known as Captain claw, it has 2 cheating modes and each has its features : 
 
