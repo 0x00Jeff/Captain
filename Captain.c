@@ -6,6 +6,15 @@
 #include"Captain.h"
 
 
+typedef struct _CLIENT_ID{
+	PVOID UniqueProcess;
+	PVOID UniqueThread;
+}CLIENT_ID, *PCLIENT_ID;
+
+
+typedef NTSTATUS(NTAPI* _NtOpenProcess)(PHANDLE, ACCESS_MASK, void *, PCLIENT_ID ci);
+
+
 int main(){
 	int mode;
 
@@ -25,7 +34,17 @@ int main(){
 
 	}while(mode != GOD_MODE && mode != PLAYABLE);
 
-	HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+	HMODULE ntdll = LoadLibrary(TEXT("ntdll"));
+	if(!ntdll){
+		perror("LoadLibrary");
+		return -1;
+	}
+
+	CLIENT_ID ci = {(HANDLE)&pid, NULL};
+
+	_NtOpenProcess _OpenProcess = (_NtOpenProcess) GetProcAddress(ntdll, "NtOpenProcess");
+	HANDLE h;
+	_OpenProcess(&h, PROCESS_ALL_ACCESS, NULL, &ci);
 	if(!h){
 		fprintf(stderr, "OpenProcess failed with error %lld\n", GetLastError());
 		return -1;
@@ -218,7 +237,9 @@ DWORD get_proc_id(char *name){
 */
 
 BOOL IsLevelStarted(HANDLE h, uintptr_t base, unsigned int *offsets,size_t size){
-	uintptr_t target_addr = resolve_dynamic_address(h, base, offsets, size);
+	static uintptr_t target_addr = 0;
+	if(!target_addr)
+		resolve_dynamic_address(h, base, offsets, size);
 
 	DWORD value = 0;
 
