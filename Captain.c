@@ -6,15 +6,6 @@
 #include"Captain.h"
 
 
-typedef struct _CLIENT_ID{
-	PVOID UniqueProcess;
-	PVOID UniqueThread;
-}CLIENT_ID, *PCLIENT_ID;
-
-
-typedef NTSTATUS(NTAPI* _NtOpenProcess)(PHANDLE, ACCESS_MASK, void *, PCLIENT_ID ci);
-
-
 int main(){
 	int mode;
 
@@ -34,19 +25,10 @@ int main(){
 
 	}while(mode != GOD_MODE && mode != PLAYABLE);
 
-	HMODULE ntdll = LoadLibrary(TEXT("ntdll"));
-	if(!ntdll){
-		perror("LoadLibrary");
-		return -1;
-	}
-
-	CLIENT_ID ci = {(HANDLE)&pid, NULL};
-
-	_NtOpenProcess _OpenProcess = (_NtOpenProcess) GetProcAddress(ntdll, "NtOpenProcess");
 	HANDLE h;
-	_OpenProcess(&h, PROCESS_ALL_ACCESS, NULL, &ci);
+	h = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 	if(!h){
-		fprintf(stderr, "OpenProcess failed with error %lld\n", GetLastError());
+		perror("OpenProcess");
 		return -1;
 	}
 
@@ -99,24 +81,23 @@ int main(){
 
 		// changing the health
 		DWORD new_health = 120;
-		ReadWriteMemory(h, base + health_start , health_offsets, health_size, (LPCVOID)&new_health, sizeof(new_health));
+		ReadWriteMemory(h, base + health_start, health_offsets, health_size, (LPCVOID)&new_health, sizeof(new_health));
 
-
-		// chaning the ammo
+		// changing the ammo
 		struct weapons w = (struct weapons){30, 30, 30};
 
-		ReadWriteMemory(h, base + ammo_start , ammo_offsets, ammo_size, (LPCVOID)&w, sizeof(w));
+		ReadWriteMemory(h, base + ammo_start, ammo_offsets, ammo_size, (LPCVOID)&w, sizeof(w));
 
-		//// extending the limites                                                                            	
+		//// extending the limits                                                                            	
 		// health part1
 		WriteCode(h, (void *)(base + health_limit_start1), health_limit_opcodes1, health_limit_opcodes_size1);
-        
+
         	// health part2
         	WriteCode(h, (void *)(base + health_limit_start2), health_limit_opcodes2, health_limit_opcodes_size2);
-        
+        	
         	// pistol ammo
         	WriteCode(h, (void *)(base + ammo_limit_offset), ammo_limit_opcodes, ammo_limit_size);
-        
+        	
         	// magic claw
         	WriteCode(h, (void *)(base + magic_limit_offset), magic_limit_opcodes, magic_limit_size);
 
@@ -131,19 +112,15 @@ int main(){
 
 void WriteCode(HANDLE h, void *ptr, char *opcodes, size_t size){
 
-	if(!WriteProcessMemory(h, ptr, (void *)opcodes, size, NULL)){
-		fprintf(stderr, "WriteProcessMemory failed with %ld\n", GetLastError());
+	if(!WriteProcessMemory(h, ptr, (void *)opcodes, size, NULL))
 		perrno("WriteProcessMemory");
-	}
 }
 
 void ReadWriteMemory(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size, LPCVOID new_value, size_t value_size){
 
 	uintptr_t target_addr = resolve_dynamic_address(h, base, offsets, size);
-	if(!WriteProcessMemory(h, (void *)target_addr, new_value, value_size, NULL)){ // handle errors!
-		fprintf(stderr, "WriteProcessMemory failed with %ld\n", GetLastError());
+	if(!WriteProcessMemory(h, (void *)target_addr, new_value, value_size, NULL))
 		perrno("WriteProcessMemory");
-	}
 }
 
 uintptr_t resolve_dynamic_address(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size){
@@ -162,7 +139,6 @@ uintptr_t GetModuleBaseAddress(DWORD pid, char *module_name){
 
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE32 | TH32CS_SNAPMODULE, pid);
 	if(snapshot == INVALID_HANDLE_VALUE){
-		//fprintf(stderr, "CreateToolhelp32Snapshot failed with %lld\n", GetLastError());
 		perrno("CreatetoolHelp32Snapshot");
 		return module_base;
 	}
@@ -191,14 +167,14 @@ uintptr_t GetModuleBaseAddress(DWORD pid, char *module_name){
 
 void perrno(char *func){
 	TCHAR err_msg[256] = {0};
-	DWORD errn;
+	DWORD err = GetLastError();
 
 	FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-         NULL, errn,
+         NULL, err,
          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
          err_msg, 256, NULL );
 
-	 printf("\n WARNING: %s failed with error %d (%s)\n", func, errno, err_msg );
+	 fprintf(stdout, "%s failed with erro %d : %s", func, err, err_msg);
 }
 
 DWORD get_proc_id(char *name){
@@ -207,7 +183,7 @@ DWORD get_proc_id(char *name){
 
 	HANDLE h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if(h == INVALID_HANDLE_VALUE){
-		fprintf(stderr, "CreateToolhelp32Snapshot failed with %lld\n", GetLastError());
+		perrno("CreateToolhelp32Snapshot");
 		return pid;
 	}
 
@@ -236,28 +212,30 @@ DWORD get_proc_id(char *name){
  * yet or not
 */
 
-BOOL IsLevelStarted(HANDLE h, uintptr_t base, unsigned int *offsets,size_t size){
+BOOL IsLevelStarted(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size){
 	static uintptr_t target_addr = 0;
 	if(!target_addr)
-		resolve_dynamic_address(h, base, offsets, size);
+		target_addr = resolve_dynamic_address(h, base, offsets, size);
 
 	DWORD value = 0;
 
-	ReadProcessMemory(h, (void *)target_addr, &value, sizeof(value), NULL);
-	printf("value = %lx\n", value);
+//	if(!ReadProcessMemory(h, (void *)target_addr, &value, sizeof(value), NULL))
+//		perrno("ReadProcessMemory");
+
+//	printf("value = %d\n", value);
 
 	if(value == 0){ // the level is currently loading
 		Sleep(500); // for good luck
 		return 1;
-	}else if(0 < value && value <= 500){	
+	}else if(0 < value && value <= 1000){	
 					// a level has started
-					// normally this vale should be used 100, but that
+					// normally this vale should be <= 100, but that
 					// would cause the cheat not to work, if it was
 					// used more than once i.e it was started again for
 					// trying a diff mode
 		return 0;
 	}else{
 		puts("please start one of levels");
-		return 1; // the game started but the palyed hasn't started a level yet
+		return 1; // the game started but the palyer hasn't started a level yet
 	}
 }
