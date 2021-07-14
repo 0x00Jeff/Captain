@@ -40,6 +40,8 @@ int main(){
 	}
 
 	do{
+		//printf("waiting for a level to be started");
+		//puts("please start a level");
 		Sleep(1000);
 
 	}while(IsLevelStarted(h, base + health_start, health_offsets, health_size));
@@ -174,7 +176,7 @@ void perrno(char *func){
          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
          err_msg, 256, NULL );
 
-	 fprintf(stdout, "%s failed with erro %d : %s", func, err, err_msg);
+	 fprintf(stdout, "%s failed with erro %ld : %s", func, err, err_msg);
 }
 
 DWORD get_proc_id(char *name){
@@ -213,16 +215,18 @@ DWORD get_proc_id(char *name){
 */
 
 BOOL IsLevelStarted(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size){
-	static uintptr_t target_addr = 0;
-	if(!target_addr)
-		target_addr = resolve_dynamic_address(h, base, offsets, size);
+	// todo : see if you can find another health pointer to make this static
+	uintptr_t target_addr = resolve_dynamic_address(h, base, offsets, size);
+	//if(!target_addr)
+	//	target_addr = resolve_dynamic_address(h, base, offsets, size);
+
 
 	DWORD value = 0;
 
 //	if(!ReadProcessMemory(h, (void *)target_addr, &value, sizeof(value), NULL))
 //		perrno("ReadProcessMemory");
 
-//	printf("value = %d\n", value);
+//	printf("addr = %p || value = %d\n", target_addr, value);
 
 	if(value == 0){ // the level is currently loading
 		Sleep(500); // for good luck
