@@ -1,7 +1,13 @@
-CC=x86_64-w64-mingw32-gcc
+FILE=		Captain.exe
+OBJ	=		$(FILE:.exe=.o)
+SRC	=		$(FILE:.exe=.c)
+HEAD=		$(FILE:.exe=.h)
 
-Captain.exe: Captain.o
-	$(CC) Captain.o -o Captain.exe -s
-	rm -- Captain.o 
+CC=			x86_64-w64-mingw32-gcc
+CFLAGS=		-Wall -Wextra -s
 
-Captain.o: Captain.c Captain.h
+$(FILE): $(OBJ)
+	$(CC) $(CFLAGS) $^ -o $@
+
+
+$(OBJ): $(HEAD)

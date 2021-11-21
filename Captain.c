@@ -16,17 +16,17 @@ int main(){
 	}
 
 	do{ 
-		puts("choose the mode :");
-		puts("1 - god mod");
-		puts("2 - playable mode");
+		puts("choose the cheating mode :");
+		printf("%d - god mode\n", GOD_MODE);
+		printf("%d - playable mode\n", PLAYABLE);
 		printf(">>> ");
 		fflush(stdout);
-		scanf("%d", &mode);
 
+		scanf("%d", &mode);
+		getc(stdin);
 	}while(mode != GOD_MODE && mode != PLAYABLE);
 
-	HANDLE h;
-	h = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+	HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 	if(!h){
 		perror("OpenProcess");
 		return -1;
@@ -40,70 +40,64 @@ int main(){
 	}
 
 	do{
-		//printf("waiting for a level to be started");
-		//puts("please start a level");
-		Sleep(1000);
-
-	}while(IsLevelStarted(h, base + health_start, health_offsets, health_size));
+		Sleep(1500);
+	}while(IsLevelStarted(h, base + health_start, health_offsets, SIZE(health_offsets)));
 
 	if(mode == GOD_MODE){
 		// changing the code responsible for editting the :
 	
 		//// health
-		WriteCode(h, (void *)(base + health_offset), health_opcodes, health_opcodes_size);
+		WriteCode(h, (void *)(base + health_offset), health_opcodes, SIZE(health_opcodes));
 
 		//// pistol ammo
 		// standing up
-		WriteCode(h, (void *)(base + standing_ammo_offset), dec_to_nop, dec_to_nop_size);
+		WriteCode(h, (void *)(base + standing_ammo_offset), dec_to_nop, SIZE(dec_to_nop));
 
 		// croushing
-		WriteCode(h, (void *)(base + croushing_ammo_offset), dec_to_nop, dec_to_nop_size);
+		WriteCode(h, (void *)(base + croushing_ammo_offset), dec_to_nop, SIZE(dec_to_nop));
 
 
 		//// magic claw
 		// standing up
-		WriteCode(h, (void *)(base + standing_magic_offset), dec_to_nop, dec_to_nop_size);
+		WriteCode(h, (void *)(base + standing_magic_offset), dec_to_nop, SIZE(dec_to_nop));
 
 		// croushing
-		WriteCode(h, (void *)(base + croushing_magic_offset), dec_to_nop, dec_to_nop_size);
+		WriteCode(h, (void *)(base + croushing_magic_offset), dec_to_nop, SIZE(dec_to_nop));
 
 
 		//// dynamite ammo
 		// standing
-		WriteCode(h, (void *)(base + standing_dynamite_offset), dec_to_nop, dec_to_nop_size);
+		WriteCode(h, (void *)(base + standing_dynamite_offset), dec_to_nop, SIZE(dec_to_nop));
 
 		// croushing
-		WriteCode(h, (void *)(base + croushing_dynamite_offset), dec_to_nop, dec_to_nop_size);
+		WriteCode(h, (void *)(base + croushing_dynamite_offset), dec_to_nop, SIZE(dec_to_nop));
 
 		// jumper
-		WriteCode(h, (void *)(base + jumper_limit_offset), jumper_limit_opcodes, jumper_limit_size);
+		WriteCode(h, (void *)(base + jumper_limit_offset), jumper_limit_opcodes, SIZE(jumper_limit_opcodes));
 
 	}
 	else{
 
 		// changing the health
 		DWORD new_health = 120;
-		ReadWriteMemory(h, base + health_start, health_offsets, health_size, (LPCVOID)&new_health, sizeof(new_health));
+		ReadWriteMemory(h, base + health_start, health_offsets, SIZE(health_offsets), (LPCVOID)&new_health, sizeof(new_health));
 
 		// changing the ammo
 		struct weapons w = (struct weapons){30, 30, 30};
-
-		ReadWriteMemory(h, base + ammo_start, ammo_offsets, ammo_size, (LPCVOID)&w, sizeof(w));
+		ReadWriteMemory(h, base + ammo_start, ammo_offsets, SIZE(ammo_offsets), (LPCVOID)&w, sizeof(w));
 
 		//// extending the limits                                                                            	
 		// health part1
-		WriteCode(h, (void *)(base + health_limit_start1), health_limit_opcodes1, health_limit_opcodes_size1);
+		WriteCode(h, (void *)(base + health_limit_start1), health_limit_opcodes1, SIZE(health_limit_opcodes1));
 
-        	// health part2
-        	WriteCode(h, (void *)(base + health_limit_start2), health_limit_opcodes2, health_limit_opcodes_size2);
+        // health part2
+        WriteCode(h, (void *)(base + health_limit_start2), health_limit_opcodes2, SIZE(health_limit_opcodes2));
         	
-        	// pistol ammo
-        	WriteCode(h, (void *)(base + ammo_limit_offset), ammo_limit_opcodes, ammo_limit_size);
+        // pistol ammo
+        WriteCode(h, (void *)(base + ammo_limit_offset), ammo_limit_opcodes, SIZE(ammo_limit_opcodes));
         	
-        	// magic claw
-        	WriteCode(h, (void *)(base + magic_limit_offset), magic_limit_opcodes, magic_limit_size);
-
-	
+        // magic claw
+        WriteCode(h, (void *)(base + magic_limit_offset), magic_limit_opcodes, SIZE(magic_limit_opcodes));
 	}
 
 	CloseHandle(h);
@@ -112,20 +106,18 @@ int main(){
 	return 0;
 }
 
-void WriteCode(HANDLE h, void *ptr, char *opcodes, size_t size){
-
+inline void WriteCode(HANDLE h, void *ptr, const unsigned char *opcodes, size_t size){
 	if(!WriteProcessMemory(h, ptr, (void *)opcodes, size, NULL))
 		perrno("WriteProcessMemory");
 }
 
-void ReadWriteMemory(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size, LPCVOID new_value, size_t value_size){
-
+void ReadWriteMemory(HANDLE h, uintptr_t base, const unsigned int *offsets, size_t size, LPCVOID new_value, size_t value_size){
 	uintptr_t target_addr = resolve_dynamic_address(h, base, offsets, size);
 	if(!WriteProcessMemory(h, (void *)target_addr, new_value, value_size, NULL))
 		perrno("WriteProcessMemory");
 }
 
-uintptr_t resolve_dynamic_address(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size){
+uintptr_t resolve_dynamic_address(HANDLE h, uintptr_t base, const unsigned int *offsets, size_t size){
 	unsigned int i = 0;
 	intptr_t ptr = base;
 	for(i = 0; i < size; i++){
@@ -136,7 +128,6 @@ uintptr_t resolve_dynamic_address(HANDLE h, uintptr_t base, unsigned int *offset
 }
 
 uintptr_t GetModuleBaseAddress(DWORD pid, char *module_name){
-
 	uintptr_t module_base = 0;
 
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE32 | TH32CS_SNAPMODULE, pid);
@@ -176,7 +167,7 @@ void perrno(char *func){
          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
          err_msg, 256, NULL );
 
-	 fprintf(stdout, "%s failed with erro %ld : %s", func, err, err_msg);
+	 fprintf(stderr, "%s failed with erro %ld : %s", func, err, err_msg);
 }
 
 DWORD get_proc_id(char *name){
@@ -207,39 +198,32 @@ DWORD get_proc_id(char *name){
 }
 
 /* 
- * the health value is accessible from the start of the game, and has a very large value
- * (probably negative), during the loading of both the initial screen and every level it 
- * has the value 0, and when the level is started it gets initiliazed with the value 100 
- * (the default health) this comes handy when testing whether a level has been started
- * yet or not
+ * the health pointer is accessible from the start of the game but when used with ReadProcessMemory
+ * in resolve_dynamic_address function it returns and error with an errno value of 299 (partial read)
+ * the "value" variable gets filled with a 0
+ * we can use this to detect if a level has been started yet or not
 */
 
-BOOL IsLevelStarted(HANDLE h, uintptr_t base, unsigned int *offsets, size_t size){
-	// todo : see if you can find another health pointer to make this static
+BOOL IsLevelStarted(HANDLE h, uintptr_t base, const unsigned int *offsets, size_t size){
+	// this variable can't be made static since resolve_dynamic_address returns diff values
+	// after and before loading a level, and the former is not what we wan't
 	uintptr_t target_addr = resolve_dynamic_address(h, base, offsets, size);
-	//if(!target_addr)
-	//	target_addr = resolve_dynamic_address(h, base, offsets, size);
 
+	DWORD health = 0;
 
-	DWORD value = 0;
+	if(!ReadProcessMemory(h, (void *)target_addr, &health, sizeof(health), NULL))
+		if(GetLastError() != 299) // partial read as if a level hasn't started yet
+			perrno("ReadProcessMemory");
 
-//	if(!ReadProcessMemory(h, (void *)target_addr, &value, sizeof(value), NULL))
-//		perrno("ReadProcessMemory");
-
-//	printf("addr = %p || value = %d\n", target_addr, value);
-
-	if(value == 0){ // the level is currently loading
-		Sleep(500); // for good luck
-		return 1;
-	}else if(0 < value && value <= 1000){	
+	if(0 < health && health <= 1000){	
 					// a level has started
-					// normally this vale should be <= 100, but that
+					// normally this vale should be == 100, but that
 					// would cause the cheat not to work, if it was
 					// used more than once i.e it was started again for
 					// trying a diff mode
 		return 0;
-	}else{
+	}else
 		puts("please start one of levels");
-		return 1; // the game started but the palyer hasn't started a level yet
-	}
+		
+	return 1;
 }

@@ -2,7 +2,7 @@
 
 ![claw.jpg](https://github.com/0x00Jeff/Captain/blob/main/Assets/claw.png)
 
-Captain is cheat for the the game known as Captain claw, it has 2 cheating modes and each has its features : 
+Captain is cheat for the the game known as Captain claw version 1.4.4.4 crazy hook update, it has 2 cheating modes with different features : 
 
 ### god mod
 - the player doesn't get any damage when hit
@@ -14,19 +14,13 @@ Captain is cheat for the the game known as Captain claw, it has 2 cheating modes
 - there is no limit to any of the health, postol ammo and the magic claws. so the player can pick up health/ammo bottles beyond what they can normally carry
 
 # how to build
-this code was written and built under GNU/Linux, if you're are using it as well, you should install `mingw-w64` package using one of the following commands depending on your distro, if you're building on it windows, figure it out.
-#### ubuntu
-        -sudo apt update && sudo apt install -y gcc-mingw-w64
-#### Arch linux
-        -sudo pacman -Sy mingw-64
+this code was written under GNU/Linux and built with `mingw-w64`, so you're gonna need that as well wether you're compiling from windows or linux
         
-then run 
+install it and run the following commands
+
 ```bash
 git clone https://github.com/0x00Jeff/Captain.git
 cd Captain
 make
 ```
 and you're good to go
-
-## thanks for
-@yezz123 for helping me find the right package name for ubuntu
