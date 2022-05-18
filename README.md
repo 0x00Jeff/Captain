@@ -2,7 +2,7 @@
 
 ![claw.jpg](https://github.com/0x00Jeff/Captain/blob/main/Assets/claw.png)
 
-Captain is cheat for the the game known as Captain claw version 1.4.4.4 crazy hook update, it has 2 cheating modes with different features : 
+Captain is cheat for the the game known as Captain claw [version 1.4.4.4 crazy hook update](https://captainclaw.net/en/downloads.html), it has 2 cheating modes with different features : 
 
 ### god mod
 - the player doesn't get any damage when hit
